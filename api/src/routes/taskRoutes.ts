@@ -8,7 +8,7 @@ import {
 export const taskRoutes = (app: Elysia) =>
     app.group('/api/tasks', (grouped) =>
         grouped
-.get('/', getTask())
+.get('/', getTask)
 .post("/", ({ body, set }) => createTask({ body, set }))
 .post("/:id/complete", ({ params, set }) => completeTask({ params, set }))
 );
