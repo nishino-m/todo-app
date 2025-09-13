@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: todo-mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: todoroot
+      MYSQL_DATABASE: todo_db
+      MYSQL_USER: todoadmin
+      MYSQL_PASSWORD: todoapp
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ptodoroot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "mysql://todoadmin:todoapp@db:3306/todo_db"
+      PORT: "3005"
+      NODE_ENV: "development"
+    ports:
+      - "3005:3005"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - api-node-mod:/app/node_modules
+    command: >
+      sh -c "
+        bun install &&
+        (bunx prisma migrate deploy || bunx prisma db push) &&
+        bun run dev
+      "
+
+volumes:
+  dbdata:
+  api-node-mod:
