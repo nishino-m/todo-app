@@ -7,5 +7,5 @@ const api = axios.create({
 });
 
 export const fetchTasks = async () => (await api.get("/tasks")).data.data;
-export const addTask    = async (title) => (await api.post("/tasks", { title })).data.data;
+
 export const updateTask = async (id) => (await api.post(`/tasks/${id}/complete`)).data.data;
